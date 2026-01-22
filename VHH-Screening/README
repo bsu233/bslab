@@ -1,0 +1,3 @@
+This folder contains the scripts that are used to perform the computational screening of nanobodies against a certain antigen.
+
+The computational framework starts with a NGS-prefiltered candidate nanobody pool.
