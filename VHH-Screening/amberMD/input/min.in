@@ -1,0 +1,11 @@
+# minimization
+&cntrl
+imin=1,maxcyc=50000,ncyc=200,
+ntb=1,cut=10,ntc=2,ntf=2,
+ntr=1,
+restraintmask=":1-630@CA,C,N,O", ! fix backbone atoms
+restraint_wt=5,
+/
+&wt type='END'
+/
+

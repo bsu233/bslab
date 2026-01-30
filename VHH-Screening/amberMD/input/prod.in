@@ -1,0 +1,12 @@
+#production MD 
+ &cntrl
+  imin=0, ntx=5, irest=1,
+  ntb=2,cut=10,ntp=1,taup=2,
+  ntc=2, ntf=2,
+  ntxo=2,
+  gamma_ln=1,
+  tempi=300, temp0=300, ntt=3,
+  nstlim=250000000, dt=0.004, ! since we did the HMassRepartition, we can use 0.004
+  ntpr=40000, ntwr=40000, ntwx=50000,
+  /
+

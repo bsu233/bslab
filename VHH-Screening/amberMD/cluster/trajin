@@ -1,0 +1,12 @@
+parm ag_HM.prmtop
+trajin ../output1/prod.nc 1 -1
+trajin ../output2/prod.nc 1 -1
+trajin ../output3/prod.nc 1 -1
+strip :WAT,Na+,Cl-
+rms first out ag.rmsd :1-630@CA,C,N,O
+rms first :1-630@CA,C,N,O
+atomicfluct out ag.rmsf :1-630&!@H* byres
+cluster c1  kmeans clusters 10 randompoint maxit 500    rms :1-630@C,N,O,CA&!@H=    sieve 10 random  out cnumvtime.dat   summary summary.dat   info info.dat   cpopvtime cpopvtime.agr normframe   repout rep repfmt pdb   singlerepout singlerep.nc singlerepfmt netcdf   avgout avg avgfmt pdb
+ run
+quit
+

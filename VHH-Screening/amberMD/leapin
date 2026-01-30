@@ -1,0 +1,10 @@
+source leaprc.protein.ff19SB
+source leaprc.water.opc
+x = loadpdb ag_af.pdb
+solvatebox x OPCBOX 10.0
+charge x
+addIonsRand x Na+ 155 Cl- 138 
+charge x
+saveamberparm x ag.prmtop ag.inpcrd
+quit
+
