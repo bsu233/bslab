@@ -1,0 +1,76 @@
+# 1. SYSTEM PREPARATION
+
+WHOLEMOLECULES ENTITY0=1-7381 ENTITY1=7382-8532
+FIT_TO_TEMPLATE REFERENCE=1.pdb TYPE=OPTIMAL
+
+# 2. ATOM GROUP DEFINITIONS
+pocket: GROUP ATOMS=710,725,908,922,952,967,1310,1358,1368,1408,1418,2264,2315,2348,6739,6785,6804,6851,7198,7275,7328,7348,7367
+helix: GROUP ATOMS=7979,7989,7999,8018,8035,8051,8062,8072,8082,8101,8108,8122,8136,8155,8179,8203,8223,8247,8257,8273
+loop: GROUP ATOMS=8313-8532
+
+# 3. MINIMAL HELIX STABILIZATION 
+
+phi1: TORSION ATOMS=7985,7987,7989,7995    # φ of some residu   
+phi2: TORSION ATOMS=8014,8016,8018,8031    # φ of another residue
+
+# ψ dihedrals: N(i)-CA(i)-C(i)-N(i+1)
+psi1: TORSION ATOMS=7977,7979,7985,7987    # ψ of some residue  
+psi2: TORSION ATOMS=8016,8018,8031,8033    # ψ of another residue
+
+# Core φ restraints (strong)
+phi1_restraint: RESTRAINT ARG=phi1 AT=-1.0472 KAPPA=50.0
+phi2_restraint: RESTRAINT ARG=phi2 AT=-1.0472 KAPPA=50.0
+# Core ψ restraints (strong)
+psi1_restraint: RESTRAINT ARG=psi1 AT=-0.7854 KAPPA=50.0
+psi2_restraint: RESTRAINT ARG=psi2 AT=-0.7854 KAPPA=50.0
+
+# 4. VIRTUAL CENTERS
+pocket_center: CENTER ATOMS=pocket
+helix_center: CENTER ATOMS=helix
+
+# 5. RELATIVE POSITION (CARTESIAN)
+dvec: DISTANCE ATOMS=helix_center,pocket_center COMPONENTS
+
+dx: MATHEVAL ARG=dvec.x FUNC=x PERIODIC=NO
+dy: MATHEVAL ARG=dvec.y FUNC=x PERIODIC=NO
+dz: MATHEVAL ARG=dvec.z FUNC=x PERIODIC=NO
+
+# 6. SPHERICAL COORDINATES (CORRECT DEFINITION)
+
+rho: MATHEVAL ARG=dx,dy,dz FUNC=sqrt(x*x+y*y+z*z) PERIODIC=NO
+
+# polar angle: theta = arccos(z / r)
+theta: MATHEVAL ARG=dz,rho FUNC=acos(x/y) PERIODIC=0,pi
+
+# azimuthal angle
+phi_angle: MATHEVAL ARG=dx,dy FUNC=atan2(y,x) PERIODIC=-pi,pi
+
+# 7. SOFT CONTACT REGULATION
+
+contacts: COORDINATION GROUPA=helix GROUPB=loop R_0=0.7
+
+contacts_wall: UPPER_WALLS ARG=contacts AT=50 KAPPA=15 EXP=2
+
+# 8. RADIAL CONFINEMENT (VERY IMPORTANT)
+rho_wall: UPPER_WALLS ARG=rho AT=3.4 KAPPA=500 EXP=2
+
+# 9. WELL-TEMPERED METADYNAMICS (SAFE VERSION)
+
+METAD ...
+  LABEL=metad
+  ARG=rho,theta,phi_angle
+  SIGMA=0.15,pi/16,pi/8
+  HEIGHT=0.5
+  PACE=500
+  BIASFACTOR=10
+  TEMP=300.0
+  FILE=HILLS
+... METAD
+
+# 10. OUTPUT
+PRINT STRIDE=500 FILE=COLVAR ARG=rho,theta,phi_angle,contacts,metad.bias
+PRINT STRIDE=1000 FILE=COORD ARG=dx,dy,dz
+
+
+
+gmx mdrun -v -deffnm metad_sim -cpi metad_sim.cpt -plumed plumed.dat
